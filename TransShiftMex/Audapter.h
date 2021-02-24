@@ -223,6 +223,7 @@ private:
 	dtype time_step;       // process time unit 
 	dtype ma_rms1;			// moving average rms 
 	dtype ma_rms2;	
+	dtype ma_zc;			// moving average zero crossing rate
 	dtype ma_rms_fb;		// moving average rms for feedback mode 4
 
 	//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  BUFFERS  *****************************************************%%%%%%%%%%%	
@@ -325,6 +326,7 @@ private:
 	int dataFileCnt;
 
 	dtype rms_ratio;
+	dtype zc_ratio;
 
 	//SCai(2012/10/19) PIP intensity shift
 	dtype intShiftRatio;
@@ -512,6 +514,7 @@ private:
 		                    dtype oldPhis[2], dtype newPhis[2], dtype mags[2], const int size);
 	void f0BandpassFilter(dtype* xIn, dtype* xOut, dtype f0, dtype sr, const int size);
 	dtype calcRMS1(const dtype *xin_ptr, int size);	
+	dtype calcZeroCrossRatio(const dtype* xin_ptr, int size);
 	dtype calcRMS2(const dtype *xin_ptr, int size);
 	dtype calcRMS_fb(const dtype *xin_ptr, int size, bool above_rms);	
 	

@@ -5,6 +5,7 @@ typedef double dtype;
 
 void	DSPF_dp_blk_move(const dtype * x, dtype * r, const int nx);
 dtype	DSPF_dp_vecsum_sq(const dtype *x,int n);        
+dtype   DSPF_dp_zcratio(const dtype* x, int n);
 void	DSPF_dp_vecmul(const dtype * x, const dtype * y, dtype * r, const int &n);
 void	DSPF_dp_autocor(dtype * r, dtype * x, const int & nx, const int & nr);
 

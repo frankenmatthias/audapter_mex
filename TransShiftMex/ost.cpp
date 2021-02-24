@@ -15,6 +15,8 @@
 
 using namespace std;
 
+#include <stdexcept>
+
 
 /* Constructor */
 OST_TAB::OST_TAB() {
@@ -44,6 +46,7 @@ OST_TAB::OST_TAB() {
 	ostModeMap[string("INTENSITY_FALL")] = INTENSITY_FALL;
 	ostModeMap[string("INTENSITY_RATIO_RISE")] = INTENSITY_RATIO_RISE;
 	ostModeMap[string("INTENSITY_RATIO_FALL_HOLD")] = INTENSITY_RATIO_FALL_HOLD;
+	ostModeMap[string("ZERO_CROSSING")] = ZERO_CROSSING;
 }
 
 /* Destructor */
@@ -224,7 +227,7 @@ void OST_TAB::readFromFile(const string ostFN, const int bVerbose)
 			try {
 				mode[i0] = ostModeMap.at(items[1]); /* WARNING: Assume C++11 is available */
 			}
-			catch (out_of_range) {
+			catch (const std::out_of_range& oor) {
 				//fclose(fp);
 				throw unrecognizedOSTModeError(items[1]);
 			}
@@ -320,7 +323,7 @@ void OST_TAB::nullify() {
 }
 
 int OST_TAB::osTrack(const int stat, const int data_counter, const int frame_counter, 
-					 const double rms_s, const double rms_o_slp, const double rms_ratio, const double *rms_rec, 
+					 const double rms_s, const double rms_o_slp, const double rms_ratio, const double zc_ratio, const double *rms_rec, 
 					 const double frameDur) {
 /* Input: stat: current status number */
 	int k, i, j;
@@ -328,6 +331,7 @@ int OST_TAB::osTrack(const int stat, const int data_counter, const int frame_cou
 	int bIsGOET;
 	int nLBDelay;
 	int minDurN;
+	int maxDurN;
 
 	int stat_out = stat;
 	/*double elapTime;*/
@@ -541,6 +545,41 @@ int OST_TAB::osTrack(const int stat, const int data_counter, const int frame_cou
 					lastStatEnd = data_counter;
 				}
 			}
+		}
+		else if (t_mode == ZERO_CROSSING) { // this addition allows to track the zero crossing rate, first arg is threshold for zero crossing rate, second is minimum duration
+			if (stat == t_stat0) {
+				if (zc_ratio > prm1[k]) {
+					stat_out = stat + 1;
+					statOnsetIndices[stat_out] = frame_counter;
+					stretchCnt = 1;
+				}
+			}
+			else {
+				minDurN = (int)floor(prm2[k] / frameDur + 0.5);
+
+				if (zc_ratio > prm1[k]) {
+					stretchCnt++;
+					//if (stretchCnt > minDurN) {
+					//	stat_out = stat + 1;
+					//	statOnsetIndices[stat_out] = frame_counter;
+					//	lastStatEnd = data_counter;
+					//}
+					
+				}
+				else {
+					if (stretchCnt > minDurN) {
+						stat_out = stat + 1;
+						statOnsetIndices[stat_out] = frame_counter;
+						lastStatEnd = data_counter;
+					}
+					else {
+						stat_out = stat - 1;
+					}
+					
+				}
+				
+			}
+
 		}
 			 
 	}

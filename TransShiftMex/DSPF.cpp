@@ -24,7 +24,22 @@ double DSPF_dp_vecsum_sq(const double *x,int n)    //SC get norm (power) of a ve
         sum += x[i] * x[i];
     }
     return sum;
-}              
+}
+double DSPF_dp_zcratio(const double *x, int n)
+{
+	double zcratio = 0.0;
+	for (int i = 1; i < n; i++) {
+		if (((x[i] > 0) - (x[i] < 0)) == ((x[i-1] > 0) - (x[i-1] < 0))) {// if consecutive samples have same sign, no zero-crossing
+			
+		}
+		else {
+			zcratio += 1.0;
+		}
+	}
+	zcratio = zcratio / n;
+	return zcratio;
+}
+
 void DSPF_dp_fir_gen(const double *  x, const double *  h, double *  r, int nh, int nr)	//SC convolution or correlation
 {
 int i, j;

@@ -1581,6 +1581,8 @@ int Audapter::handleBuffer(dtype *inFrame_ptr, dtype *outFrame_ptr, int frame_si
 
 		rms_ratio = rms_s / rms_p; // rmsratio indicates if there is a fricative around here...	
 
+		zc_ratio = calcZeroCrossRatio(oBuf + (p.nDelay - 1) * p.frameLen + si, p.frameShift);
+
 		//SC-Mod(2008/01/11)		
 		//SC Notice that the identification of a voiced frame requires, 1) RMS of the orignal signal is large enough,
 		//SC	2) RMS ratio between the orignal and preemphasized signals is large enough
@@ -1655,6 +1657,7 @@ int Audapter::handleBuffer(dtype *inFrame_ptr, dtype *outFrame_ptr, int frame_si
                               static_cast<double>(a_rms_o[data_counter]),
                               static_cast<double>(a_rms_o_slp[data_counter]),
                               static_cast<double>(rms_ratio),
+							  static_cast<double>(zc_ratio),
                               data_recorder[1], 
                               static_cast<double>(p.frameLen) / static_cast<double>(p.sr));
 		
@@ -1736,8 +1739,9 @@ int Audapter::handleBuffer(dtype *inFrame_ptr, dtype *outFrame_ptr, int frame_si
 		data_recorder[1][data_counter] = rms_s;
 		data_recorder[2][data_counter] = rms_p;
 		data_recorder[3][data_counter] = rms_o;
+		data_recorder[4][data_counter] = zc_ratio; // write zero crossing rate to data recorder
 
-		offs = 4;
+		offs = 5;
 		// Write formant frequencies and amplitudes to data_recorder
 		for (i0 = 0; i0 < p.nTracks; i0++) {
 			data_recorder[i0 + offs][data_counter] = fmts[i0];
@@ -2364,6 +2368,13 @@ dtype Audapter::calcRMS1(const dtype *xin_ptr, int size)
 	ma_rms1 = (1 - p.rmsFF) * sqrt(
         DSPF_dp_vecsum_sq(xin_ptr, size) / static_cast<dtype>(size)) + p.rmsFF * ma_rms1;
 	return ma_rms1 ;
+}
+
+dtype Audapter::calcZeroCrossRatio(const dtype* xin_ptr, int size)
+{
+	// rmsFF: RMF forgetting factor, by default equals 0.9.
+	ma_zc = (1 - p.rmsFF) * DSPF_dp_zcratio(xin_ptr, size) + p.rmsFF * ma_zc;
+	return ma_zc;
 }
 
 dtype Audapter::calcRMS2(const dtype *xin_ptr, int size)

@@ -37,7 +37,8 @@ private:
 		NEG_INTENSITY_SLOPE_STRETCH_SPAN = 11, 
 		INTENSITY_FALL = 20, 
 		INTENSITY_RATIO_RISE = 30, 
-		INTENSITY_RATIO_FALL_HOLD = 31
+		INTENSITY_RATIO_FALL_HOLD = 31,
+		ZERO_CROSSING = 40
 	} OST_MODE_NAME;
 
 	std::map<std::string, int> ostModeMap;
@@ -97,7 +98,7 @@ public:
 
 	/* Main function: online status tracking */
 	int osTrack(const int stat, const int data_counter, const int frame_counter, 
-		     	const double rms_s, const double rms_o_slp, const double rms_ratio, const double *rms_rec, 
+		     	const double rms_s, const double rms_o_slp, const double rms_ratio, const double zc_ratio, const double *rms_rec, 
 				const double frameDur);
 
 	/* Reset status */
