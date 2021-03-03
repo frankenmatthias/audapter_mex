@@ -1739,9 +1739,8 @@ int Audapter::handleBuffer(dtype *inFrame_ptr, dtype *outFrame_ptr, int frame_si
 		data_recorder[1][data_counter] = rms_s;
 		data_recorder[2][data_counter] = rms_p;
 		data_recorder[3][data_counter] = rms_o;
-		data_recorder[4][data_counter] = zc_ratio; // write zero crossing rate to data recorder
 
-		offs = 5;
+		offs = 4;
 		// Write formant frequencies and amplitudes to data_recorder
 		for (i0 = 0; i0 < p.nTracks; i0++) {
 			data_recorder[i0 + offs][data_counter] = fmts[i0];
@@ -1768,6 +1767,10 @@ int Audapter::handleBuffer(dtype *inFrame_ptr, dtype *outFrame_ptr, int frame_si
 
 		offs += 1;
 		data_recorder[offs][data_counter] = stat;
+
+		//MKF: write zero-crossing ratio to data_recorder
+		offs += 1;
+		data_recorder[offs][data_counter] = zc_ratio;
 	}
 	
 	// gain adaption: optional
