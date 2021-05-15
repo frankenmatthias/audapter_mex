@@ -165,6 +165,7 @@ Audapter::Audapter() :
 	params.addDoubleParam("rmsthr", "RMS intensity threshold");
 	params.addDoubleParam("rmsratio", "RMS ratio threshold");
 	params.addDoubleParam("rmsff", "Forgetting factor for RMS intensity smoothing");
+	params.addDoubleParam("zcrff", "Forgetting factor for zero crossing rate smoothing");
 	params.addDoubleParam("dfmtsff", "Forgetting factor for formant smoothing (in status tracking)");	//
 	params.addDoubleParam("rmsclipthresh", "Auto RMS intensity clipping threshold (loudness protection)");	//
 
@@ -264,6 +265,7 @@ Audapter::Audapter() :
 	p.dRMSThresh		= 0.02;	// RMS threshhold for voicing detection
 	p.dRMSRatioThresh	= 1.3;	// preemp / original RMS ratio threshhold, for fricative detection 
 	p.rmsFF				= 0.9;  // rms forgetting factor for long time rms 
+	p.zcrFF = 0.7; // zero crossing rate forgetting factor
 
 	p.rmsFF_fb[0]		= 0.85; // rms forgetting factor for feedback
 	p.rmsFF_fb[1]		= 0.85;	
@@ -860,6 +862,15 @@ void *Audapter::setGetParam(bool bSet,
 			dtype new_val = *((dtype *)value);
 			if ( (new_val < 0.0) || (new_val > 1.0) ) 
 				mexErrMsgTxt("Invalid input value of rmsFF");
+		}
+	}
+	else if (ns == string("zcrff")) {
+		ptr = (void *)&p.zcrFF;
+
+		if (bSet) {
+			dtype new_val = *((dtype*)value);
+			if ((new_val < 0.0) || (new_val > 1.0))
+				mexErrMsgTxt("Invalid input value of zcrFF");
 		}
 	}
 	else if (ns == string("dfmtsff")) {
@@ -2375,8 +2386,8 @@ dtype Audapter::calcRMS1(const dtype *xin_ptr, int size)
 
 dtype Audapter::calcZeroCrossRatio(const dtype* xin_ptr, int size)
 {
-	// rmsFF: RMF forgetting factor, by default equals 0.9.
-	ma_zc = (1 - p.rmsFF) * DSPF_dp_zcratio(xin_ptr, size) + p.rmsFF * ma_zc;
+	// zcrFF: zero crossing rate forgetting factor, by default equals 0.7.
+	ma_zc = (1 - p.zcrFF) * DSPF_dp_zcratio(xin_ptr, size) + p.zcrFF * ma_zc;
 	return ma_zc;
 }
 
